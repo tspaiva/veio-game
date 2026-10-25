@@ -3,8 +3,8 @@
 > Nome provisório: **Veio**
 > Plataforma: **PC** (Windows, Linux, Mac). **Build web** para testes, inclusive no celular (D13)
 > Engine: **Godot 4.7.2-stable**
-> Status: **pré-protótipo**. M0 (fundação) e M1 (mina e jogador) concluídos
-> Versão do documento: **3**. Decisões registradas em [DECISIONS.md](DECISIONS.md); plano em [PLAN.md](PLAN.md)
+> Status: **pré-protótipo**. M0 (fundação), M1 (mina e jogador) e M2 (interpretador) concluídos
+> Versão do documento: **4**. Decisões registradas em [DECISIONS.md](DECISIONS.md); plano em [PLAN.md](PLAN.md)
 
 Este documento é mantido atualizado. As referências `(Dn)` apontam para a decisão correspondente em [DECISIONS.md](DECISIONS.md).
 
@@ -200,14 +200,14 @@ A **bateria** é central: cria o ritmo de ir e voltar e transforma rota e efici�
 
 | Peça | Blocos liberados |
 |---|---|
-| Chassi (qualquer classe) | mover, voltar à base, esperar, repetir, se/senão, **quando**, ir até o minerador |
+| Chassi (qualquer classe) | mover, voltar à base, esperar, repetir, repetir até, se/senão, **quando**, e/ou/não, comparar, ir até o minerador |
 | Chassi Batedor | explorar |
-| Broca | cavar, minerar alvo |
-| Compartimento de carga | coletar, descarregar, `carga cheia?` |
+| Broca | cavar [direção], minerar |
+| Compartimento de carga | descarregar, `carga cheia?` (o minerado vai direto para a carga) |
 | Bateria | `bateria baixa?`, recarregar |
 | Scanner de minério | `vejo minério [tipo]?`, ir até minério mais próximo [tipo] (só enxerga tiles revelados, D7) |
 | Sensor de ameaça | `criatura por perto?`, `distância da criatura`, `minerador em perigo?` |
-| Arma | mirar, atirar, `inimigo no alcance?` |
+| Arma | atirar (já mira no inimigo mais próximo), `inimigo no alcance?` |
 | Antena | enviar sinal, ouvir sinal, `recebi sinal?`, ir até origem do sinal |
 | Chip de memória | guardar posição, ir até posição salva, ir até sinalizador, variáveis |
 | Braço construtor (futuro) | construir barreira, consertar drone, consertar estrutura |
@@ -227,6 +227,12 @@ Categorias de blocos:
 - Ações duradouras bloqueiam a sequência até terminar (D1).
 - A reatividade vem dos blocos **`QUANDO <condição>`**, avaliados a cada tick. Se um dispara, a ação atual é **cancelada**, o corpo do `QUANDO` executa e, ao terminar, o **programa principal reinicia** do começo.
 - Interrupções e prioridades são um conceito de progressão (seção 9.3): o jogador descobre que sem `QUANDO` o drone só reage entre uma ação e outra.
+- Regras detalhadas (D14):
+  - começa no máximo uma ação por tick; controle e condições são instantâneos;
+  - ao fim do programa principal o drone para; `repetir sempre` mantém o ciclo;
+  - `QUANDO` vale enquanto a condição for verdadeira: o handler roda de novo assim que termina;
+  - a prioridade dos `QUANDO` é a ordem em que aparecem;
+  - uma ação que falha registra o motivo no log e a execução continua.
 
 ### 7.4 Rotinas e parâmetros
 
@@ -454,10 +460,8 @@ Objetivo: **validar o loop explorar → minerar → fabricar → programar → d
 - Quantos slots por chassi de cada classe
 - Tempo que um drone fica abatido antes de virar sucata
 - Estilo visual (pixel art vs. outro)
-- Comportamento exato do bloco `explorar` (ir ao tile oculto mais próximo? andar aleatório?)
-- Diferença exata entre `cavar` e `minerar`, e em qual direção `cavar` atua
+- Confirmar no M3 o significado proposto de `explorar`, `cavar` e `minerar` (D14)
 - Raio dos sensores, alcance da antena e escopo dos sinais (global ou por alcance)
-- Prioridade entre vários `QUANDO` disparando ao mesmo tempo
 - Regras do modo roguelike (futuro)
 
 ### Resolvidas
@@ -473,6 +477,7 @@ Objetivo: **validar o loop explorar → minerar → fabricar → programar → d
 | Bloco sem a peça | falha em execução com log (D5) |
 | Idioma do código | inglês (D4) |
 | Teste no celular | build web (D13) |
+| Prioridade entre vários `QUANDO` | ordem na lista (D14) |
 
 ---
 
@@ -492,3 +497,4 @@ Objetivo: **validar o loop explorar → minerar → fabricar → programar → d
 | 1 | Documento original |
 | 2 | Decisões D1–D13 incorporadas: 3 classes com uma rotina cada e parâmetros por drone; blocos `QUANDO`; drones voam e jogador tem gravidade (escadas → elevador → jetpack); mapa sempre procedural; neblina; bloco sem peça falha com log; primeiro drone com rotina defeituosa; tick de 10 Hz e controles de velocidade; Godot 4.7.2; build web para testes |
 | 3 | M1 implementado: custo das escadas (1 ferro, devolvido ao remover), alcance da ferramenta, ferramenta inicial não fura rocha dura, controles de toque e seed pela URL |
+| 4 | M2 implementado: regras de execução (D14), blocos por peça revistos (sem `mirar` e `coletar`; `e/ou/não`, `comparar`, `repetir até`), rotinas iniciais das 3 classes |

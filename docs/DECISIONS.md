@@ -96,3 +96,24 @@ Com a neblina (D7), ele faz parte do loop central. Atualiza o escopo da seção 
 - Controles de toque (arrastar e pinçar na câmera, movimento básico) entram só como apoio aos testes. A interface continua pensada para mouse e teclado.
 - Entra no M1. O repositório é **público**, para o Pages funcionar no plano gratuito. O CI sempre gera o build e publica no Pages a partir da branch padrão quando o Pages está ativado (Settings → Pages → Source: **GitHub Actions**). Sem o Pages ativo, a publicação é pulada.
 - O link de um mapa específico usa `?seed=<n>` na URL.
+
+## D14 — Semântica do interpretador e significado dos blocos
+
+Detalha a D1 e a D11, como implementado no M2 (`core/program/program_runner.gd`).
+
+**Execução**
+- Começa **no máximo uma ação por tick**. Blocos de controle e condições são instantâneos.
+- Ao fim de `main` o drone **para** (`HALTED`). Para repetir, o jogador usa `repetir sempre`. Os `QUANDO` continuam ativos e podem acordá-lo.
+- **`QUANDO` é por nível**, não por borda: enquanto a condição for verdadeira, o handler roda de novo assim que o corpo termina (ex.: `quando inimigo no alcance: atirar` atira a cada tick). Quando a condição fica falsa, `main` reinicia do começo.
+- **Prioridade** dos `QUANDO` é a ordem na lista: um handler só interrompe os que estão abaixo dele, e nunca a si mesmo.
+- **Ação que falha** (inclusive por falta de peça, D5) registra o motivo no log e a execução segue para o próximo bloco.
+- **Condição sem a peça** vale **falso** e registra no log.
+- **Parâmetros**: valor do drone primeiro, senão o `default` declarado na rotina.
+- O **log** guarda as últimas 32 entradas; repetições seguidas viram uma entrada com contador ("minerar ×3").
+
+**Significado dos blocos (proposta, a validar no M3)**
+- `cavar [direção]`: abre o tile vizinho na direção indicada. Se for minério, ele vai para a carga.
+- `minerar`: extrai o minério adjacente ao drone (normalmente depois de `ir até minério mais próximo`).
+- `explorar` (só Batedor): vai até a borda da neblina mais próxima ainda não revelada.
+- `atirar` já mira no inimigo mais próximo; não há bloco `mirar` separado.
+- `coletar` não existe: o que é minerado vai direto para a carga.

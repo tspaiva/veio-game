@@ -6,7 +6,7 @@ Jogo 2D de mineração e automação com drones programáveis por blocos. Feito 
 - [Decisões](docs/DECISIONS.md): registro das decisões (D1, D2…) refletidas no GDD
 - [Plano](docs/PLAN.md): escopo do protótipo, marcos, estrutura e formato dos programas
 
-**Status:** M0 (fundação) e M1 (mina e jogador) concluídos. Próximo: M2 (interpretador).
+**Status:** M0 (fundação), M1 (mina e jogador) e M2 (interpretador de rotinas) concluídos. Próximo: M3 (Minerador em campo).
 
 ## Requisitos
 

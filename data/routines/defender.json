@@ -1,0 +1,32 @@
+{
+  "format": 1,
+  "class": "defender",
+  "name": "Defensor",
+  "params": {},
+  "handlers": [
+    { "id": 100, "op": "when",
+      "cond": { "id": 101, "op": "enemy_in_range" },
+      "body": [
+        { "id": 102, "op": "shoot" }
+      ]
+    }
+  ],
+  "main": [
+    { "id": 1, "op": "forever", "body": [
+      { "id": 2, "op": "if",
+        "cond": { "id": 3, "op": "miner_in_danger" },
+        "then": [ { "id": 4, "op": "goto_miner" } ],
+        "else": [
+          { "id": 5, "op": "if",
+            "cond": { "id": 6, "op": "heard_signal", "args": { "channel": "socorro" } },
+            "then": [ { "id": 7, "op": "goto_signal_source", "args": { "channel": "socorro" } } ],
+            "else": [
+              { "id": 8, "op": "return_to_base" },
+              { "id": 9, "op": "wait", "args": { "ticks": 10 } }
+            ]
+          }
+        ]
+      }
+    ]}
+  ]
+}

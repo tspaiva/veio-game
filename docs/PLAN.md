@@ -34,7 +34,7 @@ Cada marco termina **jogável ou testável**. M1 e M2 são independentes e podem
 |---|---|---|
 | M0 ✅ | **Fundação**: projeto Godot, estrutura de pastas, runner de testes, CI | `godot --headless` roda os testes, e o CI passa |
 | M1 ✅ | **Mina e jogador**: gerador com seed (terra, rocha, ferro, cobre, cristal), neblina, câmera (zoom e arraste), jogador com gravidade cavando, escadas, **build web no CI + GitHub Pages** e toque básico (D13) | dá para descer cavando e subir pelas escadas; túneis persistem; a neblina revela ao redor; o build web abre no celular |
-| M2 | **Interpretador headless**: formato do programa, registro de blocos por peça, pilha de frames, tarefas duradouras, `QUANDO`, parâmetros, orçamento de instruções, log circular | os programas de exemplo rodam num `FakeContext` e passam nos testes |
+| M2 ✅ | **Interpretador headless**: formato do programa, registro de blocos por peça, pilha de frames, tarefas duradouras, `QUANDO`, parâmetros, orçamento de instruções, log circular | os programas de exemplo rodam num `FakeContext` e passam nos testes |
 | M3 | **Minerador em campo**: drone voador, pathfinding, minerar, carga, bateria, base (descarga e recarga), destaque do bloco ativo, rotina defeituosa inicial | um Minerador trabalha sozinho por 10 minutos e o defeito aparece |
 | M4 | **Classes e hardware**: chassis por classe, slots, falha por peça ausente, painel do drone com parâmetros | trocar uma peça muda o comportamento; dois mineradores com `minério alvo` diferentes |
 | M5 | **Editor de blocos v1**: paleta filtrada pela classe, arrastar e encaixar, `se/senão`, `repetir`, `QUANDO`, parâmetros, salvar e carregar | **primeiro playtest do pilar central** |
@@ -88,7 +88,7 @@ As pastas são criadas conforme cada marco precisa delas.
 | Nome | Função | Marco |
 |---|---|---|
 | `Sim` | tick fixo, velocidade, pausa, passo a passo | M3 |
-| `Blocks` | registro de blocos por peça | M2 |
+| `Blocks` | registro de blocos por peça | M3 |
 | `Messages` | barramento de sinais (canal, origem, posição) | M9 |
 | `Game` | inventário global, créditos, desbloqueios | M6 |
 
@@ -144,56 +144,35 @@ As pastas são criadas conforme cada marco precisa delas.
 
 - `args` aceita literais ou referências `{ "param": "<nome>" }`, resolvidas pelos valores do drone.
 - Os valores dos parâmetros ficam no **drone**, não na rotina: `{ "target_ore": "copper" }`.
+- Blocos de controle: `if` (`cond`, `then`, `else`), `forever` (`body`), `repeat` (`args.times`, `body`), `repeat_until` (`cond`, `body`). `when` só aparece em `handlers`.
+- Expressões: sensores (`battery_low`…), `and`/`or` (`a`, `b`), `not` (`a`) e `compare` (`cmp` entre `<`, `<=`, `>`, `>=`, `==`, `!=`; `a` e `b` podem ser expressões ou números).
 
 ---
 
 ## 5. Interface do interpretador
 
+Implementada no M2. Regras de execução em D14.
+
+| Arquivo | Papel |
+|---|---|
+| `core/program/program.gd` | `Program`: carrega o JSON (`from_json`, `load_file`), normaliza ids e valida (`validate(registry)` devolve erros em português) |
+| `core/program/program_runner.gd` | `ProgramRunner`: um por drone; `tick()`, `reset()`, `set_program()`, `state`, `current_block_id`, sinal `block_entered`, `drone_log` |
+| `core/program/task.gd` | `Task`: ação em andamento; `tick(ctx) -> Status` (RUNNING/SUCCESS/FAILURE) e `cancel(ctx)` |
+| `core/program/drone_context.gd` | `DroneContext`: sensores e ações que os blocos usam. O drone implementa no M3; os testes usam `tests/support/fake_context.gd` |
+| `core/program/drone_log.gd` | `DroneLog`: buffer circular de 32 entradas, com repetições agrupadas |
+| `core/blocks/block_def.gd` | `BlockDef`: op, tipo (ação, condição, valor, controle, evento), peça que libera, rótulo, argumentos |
+| `core/blocks/block_registry.gd` | `BlockRegistry`: blocos por op; `available_for(parts)` dá a paleta do editor |
+| `core/blocks/standard_blocks.gd` | biblioteca do protótipo, agrupada por peça |
+| `data/routines/*.json` | rotinas iniciais: `miner` (com o defeito da D8), `defender`, `scout` |
+
 ```gdscript
-# Block definition: each part registers its own.
-class_name BlockDef extends RefCounted
-var op: StringName          # "mine", "battery_low", ...
-var part: StringName        # required part; &"" = built into chassis
-var kind: Kind              # ACTION, CONDITION, VALUE, CONTROL
-func evaluate(ctx: DroneContext, args: Dictionary) -> Variant  # conditions/values: instant
-func start(ctx: DroneContext, args: Dictionary) -> Task        # actions: may span many ticks
-
-# Long-running action.
-class_name Task extends RefCounted
-enum Status { RUNNING, SUCCESS, FAILURE }
-func tick(ctx: DroneContext) -> Status
-func cancel(ctx: DroneContext) -> void   # called when a `when` handler preempts
-
-# One runner per drone.
-class_name ProgramRunner extends RefCounted
-signal block_entered(block_id: int)
-enum State { RUNNING, IDLE, HALTED, ERROR }
-func _init(program: Program, ctx: DroneContext, registry: BlockRegistry)
-func tick() -> void
-func reset() -> void
-var current_block_id: int
-var state: State
-var log: DroneLog           # ring buffer of last N blocks/events
-
-# What blocks can ask of / do in the world.
-# The Drone implements it in-game; tests use a FakeContext.
-class_name DroneContext extends RefCounted
-func has_part(part: StringName) -> bool
-func param(name: StringName) -> Variant
-func is_revealed(cell: Vector2i) -> bool
-func cell() -> Vector2i
-# ...
+var registry := BlockRegistry.standard()
+var program := Program.load_file("res://data/routines/miner.json")
+var runner := ProgramRunner.new(program, drone_context, registry)
+runner.tick()   # uma vez por tick de simulação (10 Hz)
 ```
 
-**Ciclo de um tick:**
-
-1. Avalia os handlers `QUANDO` (em ordem de prioridade). Se um dispara e não está ativo, chama `cancel()` na tarefa atual, descarta a pilha e empilha o corpo do handler.
-2. Se há uma tarefa ativa, chama `task.tick()`. Se ela devolver `RUNNING`, o tick acaba aí.
-3. Senão, avança a pilha executando blocos de controle e condições (instantâneos) até iniciar a próxima ação, com no máximo 32 passos (D11). Se o limite estourar, o estado vira `IDLE` e o log registra.
-4. Se o bloco exige uma peça ausente, a ação falha e o log registra `"sem <peça>"` (D5).
-5. Quando o corpo de um handler termina, o `main` reinicia do começo (D1).
-
----
+**Adicionar uma peça:** criar os sensores e ações em `DroneContext` (e no drone) e registrar os blocos em `StandardBlocks`. O interpretador não muda.
 
 ## 6. Como rodar
 

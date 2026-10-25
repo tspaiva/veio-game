@@ -1,0 +1,32 @@
+{
+  "format": 1,
+  "class": "miner",
+  "name": "Minerador",
+  "params": {
+    "target_ore": { "type": "ore", "default": "iron" }
+  },
+  "handlers": [],
+  "main": [
+    { "id": 1, "op": "forever", "body": [
+      { "id": 2, "op": "if",
+        "cond": { "id": 3, "op": "cargo_full" },
+        "then": [
+          { "id": 4, "op": "return_to_base" },
+          { "id": 5, "op": "unload" }
+        ],
+        "else": [
+          { "id": 6, "op": "if",
+            "cond": { "id": 7, "op": "sees_ore", "args": { "ore": { "param": "target_ore" } } },
+            "then": [
+              { "id": 8, "op": "goto_nearest_ore", "args": { "ore": { "param": "target_ore" } } },
+              { "id": 9, "op": "mine" }
+            ],
+            "else": [
+              { "id": 10, "op": "wait", "args": { "ticks": 10 } }
+            ]
+          }
+        ]
+      }
+    ]}
+  ]
+}

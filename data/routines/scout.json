@@ -1,0 +1,21 @@
+{
+  "format": 1,
+  "class": "scout",
+  "name": "Batedor",
+  "params": {},
+  "handlers": [],
+  "main": [
+    { "id": 1, "op": "forever", "body": [
+      { "id": 2, "op": "if",
+        "cond": { "id": 3, "op": "battery_low" },
+        "then": [
+          { "id": 4, "op": "return_to_base" },
+          { "id": 5, "op": "recharge" }
+        ],
+        "else": [
+          { "id": 6, "op": "explore" }
+        ]
+      }
+    ]}
+  ]
+}
