@@ -1,6 +1,6 @@
 # Registro de decisões
 
-Decisões tomadas a partir da análise do [GDD](GDD.md). **Quando houver conflito, este documento prevalece sobre o GDD.**
+Decisões tomadas a partir da análise do [GDD](GDD.md). O GDD é mantido sincronizado com estas decisões. Toda decisão nova entra aqui com um ID e é refletida no GDD na mesma mudança. Se algo divergir, este documento prevalece.
 
 Formato: cada decisão tem um ID estável (`D<n>`) para ser citada em código, issues e PRs.
 
@@ -88,3 +88,10 @@ Com a neblina (D7), ele faz parte do loop central. Atualiza o escopo da seção 
 - **Godot 4.7.2-stable**, GDScript, renderer **Compatibility** (2D, maior compatibilidade em PC).
 - **Testes**: runner próprio e mínimo em `tests/` (sem dependências), executado em modo headless.
 - A lógica dos programas (`core/`) **não depende de nós da cena**, para poder ser testada headless.
+
+## D13 — Build web para testes
+
+- O jogo continua sendo **para PC**. O celular serve **só para testes**.
+- O CI gera um **build web** (export HTML5, single-threaded, sem exigir headers COOP/COEP) e publica no **GitHub Pages**. Ele roda no navegador do PC e do celular, sem instalar nada.
+- Controles de toque (arrastar e pinçar na câmera, movimento básico) entram só como apoio aos testes. A interface continua pensada para mouse e teclado.
+- Entra no M1. Requer ativar o GitHub Pages no repositório (Settings → Pages → Source: GitHub Actions).

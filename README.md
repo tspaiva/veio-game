@@ -2,8 +2,8 @@
 
 Jogo 2D de mineração e automação com drones programáveis por blocos. Feito em Godot 4.
 
-- [GDD](docs/GDD.md): documento de design original
-- [Decisões](docs/DECISIONS.md): decisões tomadas depois do GDD (prevalecem sobre ele)
+- [GDD](docs/GDD.md): documento de design, mantido atualizado
+- [Decisões](docs/DECISIONS.md): registro das decisões (D1, D2…) refletidas no GDD
 - [Plano](docs/PLAN.md): escopo do protótipo, marcos, estrutura e formato dos programas
 
 **Status:** M0 (fundação) concluído.

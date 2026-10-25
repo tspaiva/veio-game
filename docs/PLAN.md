@@ -20,6 +20,7 @@ Mantém tudo da seção 13 do GDD, com estes ajustes:
 | + **Primeiro Minerador com rotina defeituosa** | D8 |
 | + **Controles de velocidade** da simulação | D11 |
 | Mapa **gerado por seed** | D3 |
+| + **Build web** publicado pelo CI | D13 |
 
 Continuam fora: camadas 2+, rocha de fronteira, elevador, jetpack, sinalizadores, barreiras, memória e variáveis, funções, modo texto, classe Suporte, rotinas extras, lore, arte e áudio finais, save completo.
 
@@ -32,7 +33,7 @@ Cada marco termina **jogável ou testável**. M1 e M2 são independentes e podem
 | # | Marco | Pronto quando… |
 |---|---|---|
 | M0 | **Fundação**: projeto Godot, estrutura de pastas, runner de testes, CI | `godot --headless` roda os testes, e o CI passa |
-| M1 | **Mina e jogador**: gerador com seed (terra, rocha, ferro, cobre, cristal), neblina, câmera (zoom e arraste), jogador com gravidade cavando, escadas | dá para descer cavando e subir pelas escadas; túneis persistem; a neblina revela ao redor |
+| M1 | **Mina e jogador**: gerador com seed (terra, rocha, ferro, cobre, cristal), neblina, câmera (zoom e arraste), jogador com gravidade cavando, escadas, **build web no CI + GitHub Pages** e toque básico (D13) | dá para descer cavando e subir pelas escadas; túneis persistem; a neblina revela ao redor; o build web abre no celular |
 | M2 | **Interpretador headless**: formato do programa, registro de blocos por peça, pilha de frames, tarefas duradouras, `QUANDO`, parâmetros, orçamento de instruções, log circular | os programas de exemplo rodam num `FakeContext` e passam nos testes |
 | M3 | **Minerador em campo**: drone voador, pathfinding, minerar, carga, bateria, base (descarga e recarga), destaque do bloco ativo, rotina defeituosa inicial | um Minerador trabalha sozinho por 10 minutos e o defeito aparece |
 | M4 | **Classes e hardware**: chassis por classe, slots, falha por peça ausente, painel do drone com parâmetros | trocar uma peça muda o comportamento; dois mineradores com `minério alvo` diferentes |
