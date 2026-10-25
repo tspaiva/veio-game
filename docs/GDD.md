@@ -3,8 +3,8 @@
 > Nome provisório: **Veio**
 > Plataforma: **PC** (Windows, Linux, Mac). **Build web** para testes, inclusive no celular (D13)
 > Engine: **Godot 4.7.2-stable**
-> Status: **pré-protótipo**. M0 (fundação) concluído
-> Versão do documento: **2**. Decisões registradas em [DECISIONS.md](DECISIONS.md); plano em [PLAN.md](PLAN.md)
+> Status: **pré-protótipo**. M0 (fundação) e M1 (mina e jogador) concluídos
+> Versão do documento: **3**. Decisões registradas em [DECISIONS.md](DECISIONS.md); plano em [PLAN.md](PLAN.md)
 
 Este documento é mantido atualizado. As referências `(Dn)` apontam para a decisão correspondente em [DECISIONS.md](DECISIONS.md).
 
@@ -127,12 +127,12 @@ O jogador **tem gravidade**; os drones voam (D2). Descer fundo exige infraestrut
 
 ### 6.1 Equipamento
 
-- **Ferramenta de escavação**: minera à mão; melhorável (mais rápida, fura rocha dura).
+- **Ferramenta de escavação**: minera à mão, com alcance de cerca de 2,5 tiles; melhorável (mais rápida, fura rocha dura). A ferramenta inicial não fura rocha dura.
 - **Arma pessoal**: para defesa em emergências; melhorável e com variações (tiro único, área, atordoar).
 - **Ferramenta de reparo**: conserta drones e estruturas em campo, inclusive **drones abatidos antes de virarem sucata** (ver seção 8.2).
 - **Construção em campo**: posicionar **escadas**, **barreiras** e **sinalizadores** (pontos que os drones podem usar como alvo, ex.: "ir até sinalizador A").
 - **Mobilidade vertical**, em progressão (D2):
-  1. **Escadas**: fabricadas com ferro e posicionadas como tiles. Lentas, mas disponíveis desde o início.
+  1. **Escadas**: custam 1 ferro cada e são posicionadas como tiles (o ferro volta ao removê-las). Lentas, mas disponíveis desde o início. O jogador começa com 20 de ferro.
   2. **Elevador**: poço com cabine construído pelo jogador. Vira a "espinha" da mina e um ponto que as criaturas podem atacar.
   3. **Jetpack**: equipamento tardio, para mobilidade livre.
 - **Cargas de explosivo**: abrir a rocha de fronteira entre camadas.
@@ -375,7 +375,8 @@ Sem tutorial explícito. O jogo ensina por:
 - **Painel de debug:** bloco ativo, histórico de ações, pausar e avançar passo a passo.
 - **Controles de velocidade** da simulação: pausa, 1×, 2×, 4×.
 - Atalhos para o jogador enviar sinais manuais.
-- **Build web**: roda no navegador, inclusive no celular, para testes. Controles de toque são apenas um apoio aos testes; a interface é pensada para PC (D13).
+- **Build web**: roda no navegador, inclusive no celular, para testes. Controles de toque são apenas um apoio aos testes; a interface é pensada para PC (D13). No celular: botões de andar e subir/descer, botão MODO (cavar ↔ escada), tocar e segurar para cavar, pinça para zoom.
+- A seed do mapa aparece no HUD e pode ser fixada pela URL (`?seed=123`) para repetir um mapa.
 - Futuro opcional: **modo texto** (mesmos comandos como código escrito).
 
 ---
@@ -490,3 +491,4 @@ Objetivo: **validar o loop explorar → minerar → fabricar → programar → d
 |---|---|
 | 1 | Documento original |
 | 2 | Decisões D1–D13 incorporadas: 3 classes com uma rotina cada e parâmetros por drone; blocos `QUANDO`; drones voam e jogador tem gravidade (escadas → elevador → jetpack); mapa sempre procedural; neblina; bloco sem peça falha com log; primeiro drone com rotina defeituosa; tick de 10 Hz e controles de velocidade; Godot 4.7.2; build web para testes |
+| 3 | M1 implementado: custo das escadas (1 ferro, devolvido ao remover), alcance da ferramenta, ferramenta inicial não fura rocha dura, controles de toque e seed pela URL |

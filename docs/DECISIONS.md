@@ -94,4 +94,8 @@ Com a neblina (D7), ele faz parte do loop central. Atualiza o escopo da seção 
 - O jogo continua sendo **para PC**. O celular serve **só para testes**.
 - O CI gera um **build web** (export HTML5, single-threaded, sem exigir headers COOP/COEP) e publica no **GitHub Pages**. Ele roda no navegador do PC e do celular, sem instalar nada.
 - Controles de toque (arrastar e pinçar na câmera, movimento básico) entram só como apoio aos testes. A interface continua pensada para mouse e teclado.
-- Entra no M1. Requer ativar o GitHub Pages no repositório (Settings → Pages → Source: GitHub Actions).
+- Entra no M1. O CI sempre gera o build. A publicação no Pages fica desligada até:
+  1. o Pages estar disponível (repositório **público**, ou conta GitHub Pro/Team para repositório privado);
+  2. Settings → Pages → Source: **GitHub Actions**;
+  3. Settings → Secrets and variables → Actions → Variables: `PAGES_ENABLED` = `true`.
+- O link de um mapa específico usa `?seed=<n>` na URL.
