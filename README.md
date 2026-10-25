@@ -59,10 +59,4 @@ Precisa dos templates de exportação web do Godot 4.7.2 (`web_nothreads_*`).
 
 O workflow `.github/workflows/ci.yml` roda os testes e gera o build web a cada push. O build fica disponível como artefato da execução.
 
-A publicação no GitHub Pages (para abrir no celular por um link) fica desligada até ser configurada (D13):
-
-1. O Pages precisa estar disponível: repositório **público**, ou conta GitHub Pro/Team se ele for privado.
-2. Settings → Pages → Source: **GitHub Actions**.
-3. Settings → Secrets and variables → Actions → Variables: crie `PAGES_ENABLED` com o valor `true`.
-
-Depois disso, cada push na branch padrão publica o jogo. Para abrir um mapa específico, use `?seed=123` no fim do link.
+Com o GitHub Pages ativado (Settings → Pages → Source: **GitHub Actions**), cada push na branch padrão publica o jogo em `https://tspaiva.github.io/veio-game/`, que dá para abrir no celular (D13). Sem o Pages ativo, a publicação é pulada. Para publicar sem push: Actions → ci → **Run workflow**. Para abrir um mapa específico, use `?seed=123` no fim do link.
