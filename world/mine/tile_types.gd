@@ -1,23 +1,23 @@
 class_name TileTypes
 extends RefCounted
-## Static table of mine tile types: digging rules, drops and placeholder colors.
+## Static table of mine tile types: digging rules and placeholder names.
 ## Values are indexed by `Type` and stored per cell in `MineData`.
+## Ore is not a tile type: deposits (D15) cover cells of type DEPOSIT and
+## hold the ore and its stock themselves.
 
 enum Type {
 	AIR,
 	DIRT,
 	ROCK,
 	HARD_ROCK,
-	IRON,
-	COPPER,
-	CRYSTAL,
+	DEPOSIT,
 	BEDROCK,
 	LADDER,
 }
 
-const COUNT := 9
+const COUNT := 7
 
-## Tool tier that can never dig a tile (bedrock).
+## Tool tier that can never dig a tile. Deposits are extracted, not dug.
 const UNDIGGABLE := 99
 
 # Seconds to dig with a tier-1 tool. Indexed by Type.
@@ -26,9 +26,7 @@ const DIG_TIME: Array[float] = [
 	0.25,  # DIRT
 	0.6,   # ROCK
 	1.5,   # HARD_ROCK
-	0.8,   # IRON
-	0.8,   # COPPER
-	1.2,   # CRYSTAL
+	0.0,   # DEPOSIT
 	0.0,   # BEDROCK
 	0.15,  # LADDER
 ]
@@ -39,28 +37,13 @@ const TIER: Array[int] = [
 	1,           # DIRT
 	1,           # ROCK
 	2,           # HARD_ROCK
-	1,           # IRON
-	1,           # COPPER
-	1,           # CRYSTAL
+	UNDIGGABLE,  # DEPOSIT
 	UNDIGGABLE,  # BEDROCK
 	1,           # LADDER
 ]
 
-# Resource yielded when dug; &"" yields nothing. Indexed by Type.
-const DROP: Array[StringName] = [
-	&"",         # AIR
-	&"",         # DIRT
-	&"",         # ROCK
-	&"",         # HARD_ROCK
-	&"iron",     # IRON
-	&"copper",   # COPPER
-	&"crystal",  # CRYSTAL
-	&"",         # BEDROCK
-	&"ladder",   # LADDER: refunded when removed
-]
-
 const DISPLAY_NAME: Array[String] = [
-	"Ar", "Terra", "Rocha", "Rocha dura", "Ferro", "Cobre", "Cristal do Veio", "Leito rochoso", "Escada",
+	"Ar", "Terra", "Rocha", "Rocha dura", "Jazida", "Leito rochoso", "Escada",
 ]
 
 
@@ -70,4 +53,4 @@ static func is_solid(type: int) -> bool:
 
 
 static func is_diggable(type: int, tool_tier: int) -> bool:
-	return type != Type.AIR and tool_tier >= TIER[type]
+	return type != Type.AIR and TIER[type] != UNDIGGABLE and tool_tier >= TIER[type]

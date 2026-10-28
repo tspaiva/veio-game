@@ -112,8 +112,19 @@ Detalha a D1 e a D11, como implementado no M2 (`core/program/program_runner.gd`)
 - O **log** guarda as últimas 32 entradas; repetições seguidas viram uma entrada com contador ("minerar ×3").
 
 **Significado dos blocos (proposta, a validar no M3)**
-- `cavar [direção]`: abre o tile vizinho na direção indicada. Se for minério, ele vai para a carga.
-- `minerar`: extrai o minério adjacente ao drone (normalmente depois de `ir até minério mais próximo`).
+- `cavar [direção]`: abre o tile vizinho na direção indicada (terra e rocha).
+- `minerar`: extrai 1 unidade de uma jazida ao lado do drone (normalmente depois de `ir até minério mais próximo`). Ver D15.
 - `explorar` (só Batedor): vai até a borda da neblina mais próxima ainda não revelada.
 - `atirar` já mira no inimigo mais próximo; não há bloco `mirar` separado.
 - `coletar` não existe: o que é minerado vai direto para a carga.
+
+## D15 — Jazidas com estoque (estilo Age of Mythology)
+
+- O minério não fica mais em tiles soltos que somem ao cavar. Ele vem em **jazidas**: blocos sólidos de 2×2 ou 3×2 tiles, cada uma com um **estoque** (ex.: 400 de ferro).
+- **Minerar** extrai **1 unidade por vez** da jazida. Ela encolhe visualmente conforme esvazia, mostra o estoque restante e, ao zerar, **some e vira caverna aberta**.
+- Vários mineradores (jogador e drones) podem trabalhar na mesma jazida ao mesmo tempo, de qualquer lado.
+- Jazidas não podem ser cavadas; só extraídas. Terra e rocha continuam sendo cavadas normalmente.
+- O **cristal do Veio** usa o mesmo formato, com estoque menor e só em profundidade (a partir de 35 linhas). Cada extração vai aumentar muito a perturbação da região (GDD 8.1, M7).
+- Geração por seed: ~14 de ferro (300–500), ~10 de cobre (250–400) e ~6 de cristal (120–200), espaçadas entre si. **Sempre há uma jazida de ferro perto do spawn** (400).
+- Extração à mão: 0,5 s por unidade de ferro ou cobre, 0,9 s por unidade de cristal.
+- Atualiza a D14: `minerar` extrai 1 unidade de uma jazida ao lado do drone; `ir até minério mais próximo` vai até a jazida revelada mais próxima daquele minério; `cavar` só abre terra e rocha.

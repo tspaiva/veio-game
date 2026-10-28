@@ -1,6 +1,6 @@
 class_name Mine
 extends Node2D
-## Renders a `MineData` (terrain + fog) and owns the terrain collision.
+## Renders a `MineData` (terrain, deposits, fog) and owns the terrain collision.
 ## All gameplay changes go through `data`; this node only mirrors them.
 
 const TILE_SIZE := 16
@@ -11,12 +11,17 @@ const CAVE_COLOR := Color("120f12")
 var data: MineData
 
 var _terrain: TileMapLayer
+var _deposits: Node2D
 var _fog: TileMapLayer
 
 
 func _ready() -> void:
 	var tile_set := MineTileset.build(TILE_SIZE)
 	_terrain = _make_layer("Terrain", tile_set, true)
+	# Between terrain and fog, so hidden deposits stay hidden.
+	_deposits = Node2D.new()
+	_deposits.name = "Deposits"
+	add_child(_deposits)
 	_fog = _make_layer("Fog", tile_set, false)
 
 
@@ -36,6 +41,13 @@ func setup(p_data: MineData) -> void:
 			_paint_terrain(cell, data.get_tile(cell))
 			if not data.is_revealed(cell):
 				_paint_fog(cell)
+
+	for view in _deposits.get_children():
+		view.free()
+	for deposit in data.deposits:
+		var view := DepositView.new()
+		_deposits.add_child(view)
+		view.setup(deposit, TILE_SIZE)
 	queue_redraw()
 
 

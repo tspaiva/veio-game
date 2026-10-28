@@ -158,7 +158,8 @@ func _dig(delta: float) -> void:
 	if type == TileTypes.Type.AIR:
 		_cancel_dig()
 		return
-	if not data.can_dig(_target, tool_tier):
+	var deposit := data.deposit_at(_target)
+	if deposit == null and not data.can_dig(_target, tool_tier):
 		if _blocked_notice_cell != _target:
 			_blocked_notice_cell = _target
 			notice.emit("%s: precisa de uma ferramenta melhor" % TileTypes.DISPLAY_NAME[type])
@@ -169,24 +170,33 @@ func _dig(delta: float) -> void:
 		_dig_cell = _target
 		_dig_progress = 0.0
 	_dig_progress += delta
-	if _dig_progress >= TileTypes.DIG_TIME[type]:
-		_collect(data.dig(_target, tool_tier))
+	if _dig_progress < _work_time(_target):
+		return
+
+	if deposit != null:
+		# Deposits yield one unit per cycle while the button is held (D15).
+		_dig_progress = 0.0
+		if deposit.extract(1) > 0:
+			inventory[deposit.ore] = inventory.get(deposit.ore, 0) + 1
+			if deposit.is_depleted():
+				notice.emit("Jazida de %s esgotada" % Ores.display_name(deposit.ore))
+	else:
+		if data.dig(_target, tool_tier) == &"ladder":
+			inventory[&"iron"] += LADDER_COST
 		_cancel_dig()
+
+
+# Seconds for one dig, or for one unit extracted from a deposit.
+func _work_time(cell: Vector2i) -> float:
+	var deposit := _mine.data.deposit_at(cell)
+	if deposit != null:
+		return Ores.extract_time(deposit.ore)
+	return TileTypes.DIG_TIME[_mine.data.get_tile(cell)]
 
 
 func _cancel_dig() -> void:
 	_dig_cell = Vector2i(-9999, -9999)
 	_dig_progress = 0.0
-
-
-func _collect(drop: StringName) -> void:
-	match drop:
-		&"":
-			pass
-		&"ladder":
-			inventory[&"iron"] += LADDER_COST
-		_:
-			inventory[drop] = inventory.get(drop, 0) + 1
 
 
 func _try_place_ladder() -> void:
@@ -214,20 +224,24 @@ func _draw() -> void:
 
 func _draw_target() -> void:
 	var data := _mine.data
+	var deposit := data.deposit_at(_target)
 	var actionable: bool
 	if place_mode:
 		actionable = _target_valid and data.can_place_ladder(_target)
 	else:
 		actionable = _target_valid and _target != current_cell() and data.is_revealed(_target) \
-			and data.can_dig(_target, tool_tier)
+			and (deposit != null or data.can_dig(_target, tool_tier))
 	if not actionable and not _target_valid:
 		return
 
-	var size := Vector2(Mine.TILE_SIZE, Mine.TILE_SIZE)
-	var rect := Rect2(to_local(_mine.cell_to_world(_target)) - size / 2.0, size)
+	# Deposits highlight as a whole: they are one thing to mine.
+	var cells := Rect2i(_target, Vector2i.ONE) if deposit == null or place_mode else deposit.rect
+	var tile := Vector2(Mine.TILE_SIZE, Mine.TILE_SIZE)
+	var top_left := to_local(_mine.cell_to_world(cells.position)) - tile / 2.0
+	var rect := Rect2(top_left, Vector2(cells.size) * tile)
 	var color := Color(1, 1, 1, 0.8) if actionable else Color(1, 0.3, 0.3, 0.5)
 	draw_rect(rect, color, false, 1.0)
 
 	if _dig_cell == _target and _dig_progress > 0.0:
-		var ratio := _dig_progress / TileTypes.DIG_TIME[data.get_tile(_target)]
-		draw_rect(Rect2(rect.position + Vector2(0, size.y - 3), Vector2(size.x * ratio, 2)), Color("fff3b0"))
+		var ratio := clampf(_dig_progress / _work_time(_target), 0.0, 1.0)
+		draw_rect(Rect2(rect.position + Vector2(0, rect.size.y + 1), Vector2(rect.size.x * ratio, 2)), Color("fff3b0"))

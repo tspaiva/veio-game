@@ -16,16 +16,9 @@ const BASE_COLOR := {
 	T.DIRT: Color("6b4a2f"),
 	T.ROCK: Color("5a5a63"),
 	T.HARD_ROCK: Color("34343d"),
-	T.IRON: Color("5a5a63"),
-	T.COPPER: Color("5a5a63"),
-	T.CRYSTAL: Color("3d2e55"),
+	# Backdrop under a deposit; `DepositView` draws the ore on top.
+	T.DEPOSIT: Color("2a2730"),
 	T.BEDROCK: Color("17161c"),
-}
-
-const ORE_COLOR := {
-	T.IRON: Color("c9b8a6"),
-	T.COPPER: Color("d27a3c"),
-	T.CRYSTAL: Color("5ef2e6"),
 }
 
 
@@ -69,8 +62,6 @@ static func _draw_atlas(size: int) -> Image:
 			_draw_ladder(image, origin, size)
 		else:
 			_draw_speckled(image, origin, size, BASE_COLOR[type], rng)
-			if ORE_COLOR.has(type):
-				_draw_ore(image, origin, size, ORE_COLOR[type], rng)
 
 	image.fill_rect(Rect2i(FOG_FULL * size, Vector2i(size, size)), Color("050507"))
 	image.fill_rect(Rect2i(FOG_EDGE * size, Vector2i(size, size)), Color(0.02, 0.02, 0.03, 0.72))
@@ -86,17 +77,6 @@ static func _draw_speckled(image: Image, origin: Vector2i, size: int, base: Colo
 	for i in size:
 		image.set_pixel(origin.x + i, origin.y + size - 1, base.darkened(0.25))
 		image.set_pixel(origin.x + size - 1, origin.y + i, base.darkened(0.25))
-
-
-static func _draw_ore(image: Image, origin: Vector2i, size: int, color: Color, rng: RandomNumberGenerator) -> void:
-	for _blob in 5:
-		var center := Vector2i(rng.randi_range(2, size - 3), rng.randi_range(2, size - 3))
-		for dy in range(-1, 2):
-			for dx in range(-1, 2):
-				if absi(dx) + absi(dy) > 1 and rng.randf() < 0.5:
-					continue
-				var p := origin + center + Vector2i(dx, dy)
-				image.set_pixelv(p, color.lightened(rng.randf_range(0.0, 0.2)))
 
 
 static func _draw_ladder(image: Image, origin: Vector2i, size: int) -> void:

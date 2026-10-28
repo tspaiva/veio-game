@@ -4,7 +4,7 @@
 > Plataforma: **PC** (Windows, Linux, Mac). **Build web** para testes, inclusive no celular (D13)
 > Engine: **Godot 4.7.2-stable**
 > Status: **pré-protótipo**. M0 (fundação), M1 (mina e jogador) e M2 (interpretador) concluídos
-> Versão do documento: **4**. Decisões registradas em [DECISIONS.md](DECISIONS.md); plano em [PLAN.md](PLAN.md)
+> Versão do documento: **5**. Decisões registradas em [DECISIONS.md](DECISIONS.md); plano em [PLAN.md](PLAN.md)
 
 Este documento é mantido atualizado. As referências `(Dn)` apontam para a decisão correspondente em [DECISIONS.md](DECISIONS.md).
 
@@ -66,7 +66,9 @@ O subsolo é o lar de criaturas que reagem à extração. Elas atacam a base e o
 - Dividida em **camadas** de profundidade. Cada camada tem minérios, tipos de rocha, perigos e criaturas próprios.
 - Terreno escavado fica aberto (túneis persistentes), formando rotas que drones usam.
 - **Neblina (fog of war):** os tiles começam ocultos e são revelados pelo jogador e pelo Batedor, dentro do raio dos seus sensores (D7).
-- Tipos de tile (exemplos): terra, rocha, rocha dura, **minérios comuns** (ferro, cobre, silício…), **cristal do Veio**, toca de criaturas, água, lava/gás (camadas avançadas), **escada** (construída pelo jogador).
+- Tipos de tile (exemplos): terra, rocha, rocha dura, toca de criaturas, água, lava/gás (camadas avançadas), **escada** (construída pelo jogador).
+- **Jazidas** (D15): o minério vem em jazidas, blocos sólidos de 2×2 ou 3×2 tiles com um **estoque** (ex.: 400 de ferro), como a mina de ouro do Age of Mythology. Cada extração tira 1 unidade; a jazida encolhe visualmente, mostra quanto resta e, ao zerar, some e vira caverna aberta. Jogador e vários drones podem minerar a mesma jazida ao mesmo tempo. Jazidas não podem ser cavadas, só extraídas.
+- Sempre há uma jazida de ferro perto do ponto de partida.
 - **Rocha de fronteira** separa as camadas (ver seção 6.3).
 - Câmera com zoom (rodinha do mouse) e arraste, permitindo alternar entre visão geral e detalhe.
 
@@ -76,7 +78,7 @@ O subsolo é o lar de criaturas que reagem à extração. Elas atacam a base e o
 
 ### 5.1 Minérios comuns: para construir
 
-Usados na **fabricação** de drones, peças, estruturas e equipamento do jogador. Novos minérios aparecem em camadas mais profundas, liberando peças melhores.
+Usados na **fabricação** de drones, peças, estruturas e equipamento do jogador. Novos minérios aparecem em camadas mais profundas, liberando peças melhores. Todo minério vem de **jazidas com estoque** (seção 4, D15).
 
 | Minério (proposta) | Camada | Uso principal |
 |---|---|---|
@@ -89,6 +91,7 @@ Usados na **fabricação** de drones, peças, estruturas e equipamento do jogado
 ### 5.2 Cristal do Veio: para a corporação
 
 - Não é usado na fabricação. É **enviado à corporação** por um ponto de envio na base.
+- Vem em jazidas como os outros minérios, mas menores (120–200) e só em profundidade.
 - Em troca, a corporação concede **créditos / reputação** que liberam:
   - novas **plantas de peças** (que destravam novos blocos de programação)
   - melhorias da base (energia, capacidade de fabricação)
@@ -202,7 +205,7 @@ A **bateria** é central: cria o ritmo de ir e voltar e transforma rota e efici�
 |---|---|
 | Chassi (qualquer classe) | mover, voltar à base, esperar, repetir, repetir até, se/senão, **quando**, e/ou/não, comparar, ir até o minerador |
 | Chassi Batedor | explorar |
-| Broca | cavar [direção], minerar |
+| Broca | cavar [direção] (terra e rocha), minerar (1 unidade de uma jazida ao lado) |
 | Compartimento de carga | descarregar, `carga cheia?` (o minerado vai direto para a carga) |
 | Bateria | `bateria baixa?`, recarregar |
 | Scanner de minério | `vejo minério [tipo]?`, ir até minério mais próximo [tipo] (só enxerga tiles revelados, D7) |
@@ -498,3 +501,4 @@ Objetivo: **validar o loop explorar → minerar → fabricar → programar → d
 | 2 | Decisões D1–D13 incorporadas: 3 classes com uma rotina cada e parâmetros por drone; blocos `QUANDO`; drones voam e jogador tem gravidade (escadas → elevador → jetpack); mapa sempre procedural; neblina; bloco sem peça falha com log; primeiro drone com rotina defeituosa; tick de 10 Hz e controles de velocidade; Godot 4.7.2; build web para testes |
 | 3 | M1 implementado: custo das escadas (1 ferro, devolvido ao remover), alcance da ferramenta, ferramenta inicial não fura rocha dura, controles de toque e seed pela URL |
 | 4 | M2 implementado: regras de execução (D14), blocos por peça revistos (sem `mirar` e `coletar`; `e/ou/não`, `comparar`, `repetir até`), rotinas iniciais das 3 classes |
+| 5 | Jazidas com estoque no estilo Age of Mythology (D15): o minério deixa de ser tile solto; jogador e drones extraem 1 unidade por vez até a jazida esgotar |
